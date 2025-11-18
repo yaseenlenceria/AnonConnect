@@ -5,25 +5,29 @@ services:
   # Signaling Server (Backend)
   - type: web
     name: anonconnect-signaling
+    runtime: node
     env: node
     region: oregon
     plan: free
-    buildCommand: npm install
+    buildCommand: npm ci --omit=dev
     startCommand: npm run server
     envVars:
       - key: NODE_ENV
         value: production
       - key: PORT
         generateValue: true
+      - key: NPM_CONFIG_PRODUCTION
+        value: "false"
     healthCheckPath: /health
 
   # Frontend (Next.js)
   - type: web
     name: anonconnect-web
+    runtime: node
     env: node
     region: oregon
     plan: free
-    buildCommand: npm install && npm run build
+    buildCommand: npm ci && npm run build
     startCommand: npm start
     envVars:
       - key: NODE_ENV
@@ -35,4 +39,6 @@ services:
           property: host
       - key: GOOGLE_GENERATIVE_AI_API_KEY
         sync: false  # Set this manually in Render dashboard
+      - key: NPM_CONFIG_PRODUCTION
+        value: "false"
     healthCheckPath: /
