@@ -11,10 +11,13 @@ import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { useFormState, useFormStatus } from 'react-dom';
 import { submitFeedback } from '@/app/actions';
-import { useEffect, useRef, FormEvent } from 'react';
+import { useEffect, useRef, FormEvent, useState } from 'react';
 import { countries } from '@/lib/countries';
 import { AnonConnectLogo } from '@/components/icons';
-import { Globe, Send, SkipForward, PhoneOff, Loader2, Sparkles, MessageCircle } from 'lucide-react';
+import { Globe, Send, SkipForward, PhoneOff, Loader2, Sparkles, MessageCircle, Phone } from 'lucide-react';
+import { Dialer } from '@/components/dialer';
+import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export function AnonConnectUI() {
   const {
@@ -29,6 +32,8 @@ export function AnonConnectUI() {
     setCountry,
     setConnectionState,
   } = useAnonConnect();
+
+  const [showDialer, setShowDialer] = useState(false);
 
   const renderContent = () => {
     switch (connectionState) {
@@ -57,54 +62,154 @@ export function AnonConnectUI() {
             country={country}
             onCountryChange={setCountry}
             onStart={startSearch}
+            onOpenDialer={() => setShowDialer(true)}
           />
         );
     }
   };
 
   return (
-    <Card className="w-full max-w-md mx-auto shadow-2xl shadow-primary/10">
-      <CardHeader className="text-center">
-        <div className="flex items-center justify-center gap-3 mb-2">
-          <AnonConnectLogo className="w-10 h-10 text-primary" />
-          <CardTitle className="text-3xl font-bold tracking-tighter bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent-foreground">
-            AnonConnect
-          </CardTitle>
-        </div>
-        <CardDescription>
-          Connect with random strangers through voice and chat.
-        </CardDescription>
-      </CardHeader>
-      <CardContent>{renderContent()}</CardContent>
-    </Card>
+    <>
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.4 }}
+      >
+        <Card className="w-full max-w-md mx-auto shadow-2xl shadow-primary/10 backdrop-blur-sm bg-card/95 border-2">
+          <CardHeader className="text-center">
+            <div className="flex items-center justify-center gap-3 mb-2">
+              <motion.div
+                initial={{ rotate: 0 }}
+                animate={{ rotate: 360 }}
+                transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+              >
+                <AnonConnectLogo className="w-10 h-10 text-primary" />
+              </motion.div>
+              <CardTitle className="text-3xl font-bold tracking-tighter bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent-foreground">
+                AnonConnect
+              </CardTitle>
+            </div>
+            <CardDescription>
+              Connect with random strangers through voice and chat.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>{renderContent()}</CardContent>
+        </Card>
+      </motion.div>
+
+      {/* Dialer Dialog */}
+      <Dialog open={showDialer} onOpenChange={setShowDialer}>
+        <DialogContent className="max-w-md p-0 bg-transparent border-none">
+          <Dialer
+            onRandomCall={() => {
+              setShowDialer(false);
+              startSearch(country);
+            }}
+            onCall={(number) => {
+              setShowDialer(false);
+              // In a real app, you'd handle direct calling here
+              console.log('Calling:', number);
+              startSearch(country);
+            }}
+            onClose={() => setShowDialer(false)}
+          />
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }
 
-function IdleView({ country, onCountryChange, onStart }: { country: string; onCountryChange: (c: string) => void; onStart: (c: string) => void; }) {
+function IdleView({
+  country,
+  onCountryChange,
+  onStart,
+  onOpenDialer
+}: {
+  country: string;
+  onCountryChange: (c: string) => void;
+  onStart: (c: string) => void;
+  onOpenDialer: () => void;
+}) {
   return (
     <div className="flex flex-col gap-4">
-      <Select value={country} onValueChange={onCountryChange}>
-        <SelectTrigger>
-          <SelectValue placeholder="Select a matching region" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="global">
-            <div className="flex items-center gap-2">
-              <Globe className="w-4 h-4" /> Global
-            </div>
-          </SelectItem>
-          {countries.map(c => (
-            <SelectItem key={c.code} value={c.code}>
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.1 }}
+      >
+        <Select value={country} onValueChange={onCountryChange}>
+          <SelectTrigger className="h-12">
+            <SelectValue placeholder="Select a matching region" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="global">
               <div className="flex items-center gap-2">
-                <span>{c.flag}</span> {c.name}
+                <Globe className="w-4 h-4" /> Global
               </div>
             </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-      <Button size="lg" onClick={() => onStart(country)} className="w-full">
-        Start Connecting
-      </Button>
+            {countries.map(c => (
+              <SelectItem key={c.code} value={c.code}>
+                <div className="flex items-center gap-2">
+                  <span>{c.flag}</span> {c.name}
+                </div>
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </motion.div>
+
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.2 }}
+      >
+        <Button
+          size="lg"
+          onClick={() => onStart(country)}
+          className="w-full h-12 text-lg font-semibold bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70"
+        >
+          <Sparkles className="w-5 h-5 mr-2" />
+          Start Random Chat
+        </Button>
+      </motion.div>
+
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.3 }}
+        className="relative"
+      >
+        <div className="flex items-center gap-2 my-2">
+          <div className="flex-1 h-px bg-border" />
+          <span className="text-xs text-muted-foreground uppercase">or</span>
+          <div className="flex-1 h-px bg-border" />
+        </div>
+      </motion.div>
+
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.4 }}
+      >
+        <Button
+          size="lg"
+          variant="outline"
+          onClick={onOpenDialer}
+          className="w-full h-12 text-lg font-semibold border-2 hover:bg-primary/5 hover:border-primary/40"
+        >
+          <Phone className="w-5 h-5 mr-2" />
+          Open Dialer
+        </Button>
+      </motion.div>
+
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.5 }}
+        className="text-center text-xs text-muted-foreground mt-2"
+      >
+        <p>Tap the dialer to call a specific user or shuffle for random</p>
+      </motion.div>
     </div>
   );
 }
