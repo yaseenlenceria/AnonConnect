@@ -5,11 +5,40 @@ import { Server } from 'socket.io';
 const app = express();
 const server = http.createServer(app);
 
+// Determine allowed origins based on environment
+const allowedOrigins = process.env.NODE_ENV === 'production'
+  ? [
+      process.env.FRONTEND_URL || '',
+      'https://anonconnect.ondigitalocean.app',
+      /\.ondigitalocean\.app$/,
+      /\.vercel\.app$/
+    ].filter(Boolean)
+  : "*";
+
 const io = new Server(server, {
   cors: {
-    origin: "*", // Allow all origins for simplicity. In production, restrict this.
-    methods: ["GET", "POST"]
-  }
+    origin: allowedOrigins,
+    methods: ["GET", "POST"],
+    credentials: true
+  },
+  pingTimeout: 60000,
+  pingInterval: 25000,
+  transports: ['websocket', 'polling']
+});
+
+// Health check endpoint for DigitalOcean
+app.get('/', (req, res) => {
+  res.json({
+    status: 'ok',
+    service: 'AnonConnect Signaling Server',
+    timestamp: new Date().toISOString(),
+    connections: io.engine.clientsCount,
+    uptime: process.uptime()
+  });
+});
+
+app.get('/health', (req, res) => {
+  res.json({ status: 'healthy' });
 });
 
 // In-memory data structures for matching

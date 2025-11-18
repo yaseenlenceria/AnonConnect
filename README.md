@@ -11,7 +11,29 @@
 
 [Features](#features) • [Demo](#demo) • [Installation](#installation) • [Usage](#usage) • [Deployment](#deployment)
 
+[![Deploy to DO](https://www.deploytodo.com/do-btn-blue.svg)](https://cloud.digitalocean.com/apps/new?repo=https://github.com/yaseenlenceria/AnonConnect/tree/main)
+
 </div>
+
+---
+
+## Quick Deploy
+
+### Deploy to DigitalOcean (Recommended)
+
+The fastest way to deploy AnonConnect is using DigitalOcean App Platform:
+
+1. **Click the button above** ☝️
+2. **Sign in** to DigitalOcean
+3. **Configure environment variables**:
+   - `GOOGLE_GENERATIVE_AI_API_KEY` - Your Google AI API key
+4. **Click "Create Resources"**
+5. **Wait 5-10 minutes** for deployment
+6. **Done!** Your app will be live at `https://your-app.ondigitalocean.app`
+
+**Cost:** ~$10/month (includes frontend + backend)
+
+📖 **[Full Deployment Guide](./DEPLOYMENT.md)** - Complete step-by-step instructions
 
 ---
 
@@ -200,33 +222,61 @@ User A                 Signaling Server              User B
 
 ## Deployment
 
-### Frontend (Vercel)
+### DigitalOcean App Platform (Recommended) ⭐
+
+**One-Click Deploy:**
+
+[![Deploy to DO](https://www.deploytodo.com/do-btn-blue.svg)](https://cloud.digitalocean.com/apps/new?repo=https://github.com/yaseenlenceria/AnonConnect/tree/main)
+
+**Why DigitalOcean?**
+- ✅ Deploys both frontend and backend together
+- ✅ Automatic HTTPS and SSL certificates
+- ✅ WebSocket support out of the box
+- ✅ Auto-scaling and monitoring
+- ✅ Simple pricing (~$10/month for both services)
+
+**Quick Start:**
+1. Click the deploy button above
+2. Sign in to DigitalOcean
+3. Set environment variable: `GOOGLE_GENERATIVE_AI_API_KEY`
+4. Click "Create Resources"
+5. Done! Live in 5-10 minutes
+
+📖 **[Complete DigitalOcean Deployment Guide](./DEPLOYMENT.md)**
+
+### Alternative: Frontend (Vercel) + Backend (Railway)
+
+**Frontend on Vercel:**
 
 1. Push your code to GitHub
 2. Visit [Vercel](https://vercel.com) and import your repository
-3. Add environment variables in Vercel dashboard:
-   - \`NEXT_PUBLIC_SIGNALING_SERVER_URL\` - Your deployed signaling server URL
-   - \`GOOGLE_GENERATIVE_AI_API_KEY\` - Your Google AI API key
+3. Add environment variables:
+   - `NEXT_PUBLIC_SIGNALING_SERVER_URL` - Your deployed signaling server URL
+   - `GOOGLE_GENERATIVE_AI_API_KEY` - Your Google AI API key
 4. Deploy
 
-### Backend (Railway/Render/Heroku)
-
-**Using Railway:**
+**Backend on Railway:**
 
 1. Visit [Railway](https://railway.app)
 2. Create a new project from your GitHub repository
-3. Set the start command: \`npm run server\`
-4. Set environment variable \`PORT\` (Railway auto-provides this)
+3. Set the start command: `npm run server`
+4. Set environment variable `PORT` (Railway auto-provides this)
 5. Deploy
 
-**Using Render:**
+### Docker Deployment
 
-1. Visit [Render](https://render.com)
-2. Create a new Web Service
-3. Connect your GitHub repository
-4. Build command: \`npm install\`
-5. Start command: \`npm run server\`
-6. Deploy
+For self-hosting on your own server:
+
+\`\`\`bash
+# Build the image
+docker build -t anonconnect .
+
+# Run the container
+docker run -p 3000:3000 -p 3001:3001 \\
+  -e GOOGLE_GENERATIVE_AI_API_KEY=your_key \\
+  -e NEXT_PUBLIC_SIGNALING_SERVER_URL=https://your-domain.com \\
+  anonconnect
+\`\`\`
 
 ### TURN Server (Optional)
 

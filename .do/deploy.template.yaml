@@ -1,0 +1,37 @@
+spec:
+  name: anonconnect
+  services:
+  - name: signaling-server
+    github:
+      branch: main
+      deploy_on_push: true
+      repo: yaseenlenceria/AnonConnect
+    build_command: npm install
+    run_command: npm run server
+    http_port: 8080
+    instance_count: 1
+    instance_size_slug: basic-xxs
+    routes:
+    - path: /socket.io
+    envs:
+    - key: NODE_ENV
+      value: production
+    - key: PORT
+      value: "8080"
+  - name: web
+    github:
+      branch: main
+      deploy_on_push: true
+      repo: yaseenlenceria/AnonConnect
+    build_command: npm install && npm run build
+    run_command: npm start
+    http_port: 3000
+    instance_count: 1
+    instance_size_slug: basic-xxs
+    routes:
+    - path: /
+    envs:
+    - key: NODE_ENV
+      value: production
+    - key: NEXT_PUBLIC_SIGNALING_SERVER_URL
+      value: ${signaling-server.PUBLIC_URL}

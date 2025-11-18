@@ -1,0 +1,38 @@
+# Render Blueprint for AnonConnect
+# https://render.com/docs/blueprint-spec
+
+services:
+  # Signaling Server (Backend)
+  - type: web
+    name: anonconnect-signaling
+    env: node
+    region: oregon
+    plan: free
+    buildCommand: npm install
+    startCommand: npm run server
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        generateValue: true
+    healthCheckPath: /health
+
+  # Frontend (Next.js)
+  - type: web
+    name: anonconnect-web
+    env: node
+    region: oregon
+    plan: free
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NEXT_PUBLIC_SIGNALING_SERVER_URL
+        fromService:
+          type: web
+          name: anonconnect-signaling
+          property: host
+      - key: GOOGLE_GENERATIVE_AI_API_KEY
+        sync: false  # Set this manually in Render dashboard
+    healthCheckPath: /
