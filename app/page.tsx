@@ -5,6 +5,13 @@ import { motion } from 'framer-motion';
 import { Sparkles, Phone, MessageCircle, Globe, Shield } from 'lucide-react';
 
 export default function Home() {
+  const getViewportDimensions = () => {
+    if (typeof window === 'undefined') {
+      return {width: 1920, height: 1080};
+    }
+    return {width: window.innerWidth, height: window.innerHeight};
+  };
+
   return (
     <main className="relative flex min-h-screen w-full flex-col items-center justify-center p-4 sm:p-8 overflow-hidden">
       {/* Animated Background */}
@@ -14,13 +21,18 @@ export default function Home() {
 
       {/* Floating Particles */}
       <div className="absolute inset-0 -z-5 overflow-hidden">
-        {[...Array(20)].map((_, i) => (
+        {[...Array(20)].map((_, i) => {
+          const {width, height} = getViewportDimensions();
+          const initialX = Math.random() * width;
+          const initialY = Math.random() * height;
+
+          return (
           <motion.div
             key={i}
             className="absolute w-2 h-2 bg-primary/20 rounded-full"
             initial={{
-              x: Math.random() * window.innerWidth,
-              y: Math.random() * window.innerHeight,
+              x: initialX,
+              y: initialY,
             }}
             animate={{
               y: [null, Math.random() * -100 - 100],
@@ -33,7 +45,8 @@ export default function Home() {
               delay: Math.random() * 2,
             }}
           />
-        ))}
+          );
+        })}
       </div>
 
       {/* Hero Section */}
